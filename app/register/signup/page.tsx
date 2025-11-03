@@ -88,4 +88,3 @@ export default function signup() {
     </main>
   );
 }
-false
