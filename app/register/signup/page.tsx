@@ -1,9 +1,10 @@
 "use client";
+
 import axios from "axios";
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Correct useRouter import
+import { useRouter } from "next/navigation";
 
-export default function signup() {
+export default function Signup() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,13 +14,17 @@ export default function signup() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Basic front-end validation
     if (!username || !email || !password) {
       setError("Please fill all fields.");
       return;
     }
+
     setError("");
+
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_NESTJS_API_URL}/register`, {
+      await axios.post(`${process.env.NEXT_PUBLIC_NESTJS_API_URL}/users`, {
         username,
         email,
         password,
@@ -30,10 +35,15 @@ export default function signup() {
       setEmail("");
       setPassword("");
 
+      // Redirect to another page after registration
       router.push("https://en.wikipedia.org/wiki/Puttu");
-    } catch (err) {
-      console.error("Error submitting the form ", err);
-      setError("Registration failed.");
+    } catch (err: any) {
+      console.error("Error submitting the form:", err);
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Registration failed.");
+      }
     }
   };
 
@@ -80,7 +90,7 @@ export default function signup() {
         </button>
       </form>
 
-      {submitted && (
+      {submitted && ( 
         <p className="text-green-500 mt-4">Registration successful!</p>
       )}
 

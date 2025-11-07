@@ -1,47 +1,50 @@
-// app/register/login.tsx
 "use client";
+
 import axios from "axios";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
-  
-export default function login() {
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [success, setSuccess] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    const authStatus = localStorage.getItem("isAuthenticated");
-    setIsAuthenticated(authStatus === "true");
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (!email || !password) {
-      setError("Please fill all fields.");
+      setError("Please enter both email and password.");
       return;
     }
 
     setError("");
+
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_NESTJS_API_URL}/food`, {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_NESTJS_API_URL}/users/login`,
+        {
+          email,
+          password,
+        }
+      );
 
-      setSubmitted(true);
-      setEmail("");
-      setPassword("");
+      console.log("Login success:", response.data);
+      setSuccess(true);
 
-      // Redirect to the dashboard or home after successful login
-      localStorage.setItem("isAuthenticated", "true");
-      setIsAuthenticated(true);
-      router.push("/dashboard");
-    } catch (err) {
-      console.error("Error submitting the form ", err);
-      setError("Submission failed.");
+      // store token or user info (optional)
+      localStorage.setItem("user", JSON.stringify(response.data));
+
+      // redirect to home or dashboard
+      router.push("/home");
+    } catch (err: any) {
+      console.error("Login error:", err);
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Login failed. Please check your credentials.");
+      }
     }
   };
 
@@ -56,7 +59,6 @@ export default function login() {
         <label className="block mb-2 text-lg">Email:</label>
         <input
           type="email"
-          name="email"
           placeholder="Enter your email..."
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -66,8 +68,7 @@ export default function login() {
         <label className="block mb-2 text-lg">Password:</label>
         <input
           type="password"
-          name="password"
-          placeholder="Enter your Password..."
+          placeholder="Enter your password..."
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="p-2 border rounded-md w-full mb-4"
@@ -75,16 +76,13 @@ export default function login() {
 
         <button
           type="submit"
-          className="text-white bg-orange-500 px-6 py-2 rounded-lg transition-all duration-300 ease-in-out hover:bg-orange-600 w-full"
+          className="text-white bg-blue-500 px-6 py-2 rounded-lg hover:bg-blue-600 w-full"
         >
-          Submit
+          Login
         </button>
       </form>
 
-      {submitted && (
-        <p className="text-green-500 mt-4">Form submitted successfully!</p>
-      )}
-
+      {success && <p className="text-green-500 mt-4">Login successful!</p>}
       {error && <p className="text-red-500 mt-4">{error}</p>}
     </main>
   );
