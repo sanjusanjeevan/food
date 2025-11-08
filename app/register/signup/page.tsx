@@ -15,7 +15,6 @@ export default function Signup() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Basic front-end validation
     if (!username || !email || !password) {
       setError("Please fill all fields.");
       return;
@@ -37,12 +36,18 @@ export default function Signup() {
 
       // Redirect to another page after registration
       router.push("https://en.wikipedia.org/wiki/Puttu");
-    } catch (err: any) {
-      console.error("Error submitting the form:", err);
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
+    } catch (err: unknown) {
+      // ✅ Type-safe error handling
+      if (axios.isAxiosError(err)) {
+        console.error("Error submitting the form:", err);
+        if (err.response?.data?.message) {
+          setError(err.response.data.message);
+        } else {
+          setError("Registration failed.");
+        }
       } else {
-        setError("Registration failed.");
+        console.error("Unexpected error:", err);
+        setError("An unexpected error occurred.");
       }
     }
   };
@@ -90,7 +95,7 @@ export default function Signup() {
         </button>
       </form>
 
-      {submitted && ( 
+      {submitted && (
         <p className="text-green-500 mt-4">Registration successful!</p>
       )}
 

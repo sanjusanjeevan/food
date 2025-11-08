@@ -38,14 +38,20 @@ export default function Login() {
 
       // redirect to home or dashboard
       router.push("/home");
-    } catch (err: any) {
-      console.error("Login error:", err);
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("Login failed. Please check your credentials.");
-      }
+} catch (err: unknown) {
+  if (axios.isAxiosError(err)) {
+    console.error("Login error:", err);
+    if (err.response?.data?.message) {
+      setError(err.response.data.message);
+    } else {
+      setError("Login failed. Please check your credentials.");
     }
+  } else {
+    console.error("Unexpected error:", err);
+    setError("An unexpected error occurred.");
+  }
+}
+
   };
 
   return (
