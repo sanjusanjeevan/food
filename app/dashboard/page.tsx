@@ -1,2 +1,6 @@
-<h1>this is admin dashboard</h1>
-import React from 'react';
+"use client";
+import React from "react";
+
+export default function DashboardPage() {
+  return <h1>This is Admin Dashboard</h1>;
+}
